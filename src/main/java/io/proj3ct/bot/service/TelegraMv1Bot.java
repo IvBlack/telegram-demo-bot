@@ -1,6 +1,8 @@
 package io.proj3ct.bot.service;
 
 import io.proj3ct.bot.config.BotConfig;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -9,6 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 //TelegramLongPollingBot пингует API постоянно
+@Slf4j
 @Component
 public class TelegraMv1Bot extends TelegramLongPollingBot {
     final BotConfig botConfig;
@@ -46,6 +49,7 @@ public class TelegraMv1Bot extends TelegramLongPollingBot {
 
     private void startCommandReceived(long chatId, String userName) {
         String answer = "Hello, " + userName + " nice to meet you!";
+        log.info("Start message sent to user: " + userName);
         sendMessageToUser(chatId, answer);
     }
 
