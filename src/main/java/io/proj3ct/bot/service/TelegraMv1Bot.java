@@ -1,5 +1,6 @@
 package io.proj3ct.bot.service;
 
+import com.vdurmont.emoji.EmojiParser;
 import io.proj3ct.bot.config.BotConfig;
 import io.proj3ct.bot.model.User;
 import io.proj3ct.bot.model.UserRepository;
@@ -105,7 +106,8 @@ public class TelegraMv1Bot extends TelegramLongPollingBot {
     }
 
     private void startCommandReceived(long chatId, String userName) {
-        String answer = "Hello, " + userName + " nice to meet you!";
+        String answer = EmojiParser.parseToUnicode("Hello, " + userName + " nice to meet you! " + ":x:");
+//        String answer = "Hello, " + userName + " nice to meet you! " + ":blush:";
         log.info("Start message sent to user: " + userName);
         sendMessageToUser(chatId, answer);
     }
