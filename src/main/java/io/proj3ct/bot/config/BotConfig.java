@@ -1,10 +1,10 @@
 package io.proj3ct.bot.config;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 
 @Configuration
 @PropertySource("application.properties")

@@ -1,18 +1,23 @@
 package io.proj3ct.bot.service;
 
 import io.proj3ct.bot.config.BotConfig;
+import io.proj3ct.bot.model.User;
+import io.proj3ct.bot.model.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +28,9 @@ public class TelegraMv1Bot extends TelegramLongPollingBot {
     private static final String HELP_TEXT = """
             Help command /h - description will be here.\n\n
             Type /start to start messaging \n\n or /mydata to see stored data about you.""";
+
+    @Autowired
+    private UserRepository userRepository;
     final BotConfig botConfig;
 
     public TelegraMv1Bot(BotConfig botConfig) {
@@ -62,7 +70,9 @@ public class TelegraMv1Bot extends TelegramLongPollingBot {
             String text = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
             switch (text) {
-                case "/start": startCommandReceived(chatId,
+                case "/start":
+                    registerUser(update.getMessage());
+                    startCommandReceived(chatId,
                                 update.getMessage()
                                 .getChat()
                                 .getFirstName());
@@ -71,6 +81,26 @@ public class TelegraMv1Bot extends TelegramLongPollingBot {
                     break;
                 default: sendMessageToUser(chatId, "Sorry, command is not recognized.");
             }
+        }
+    }
+
+    private void registerUser(Message msg) {
+
+        if(userRepository.findById(msg.getChatId()).isEmpty()){
+
+            var chatId = msg.getChatId();
+            var chat = msg.getChat();
+
+            User user = new User();
+
+            user.setChatId(chatId);
+            user.setFirstName(chat.getFirstName());
+            user.setLastName(chat.getLastName());
+            user.setUserName(chat.getUserName());
+            user.setRegisteredAt(new Timestamp(System.currentTimeMillis()));
+
+            userRepository.save(user);
+            log.info("user saved: " + user);
         }
     }
 

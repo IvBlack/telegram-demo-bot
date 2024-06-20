@@ -10,7 +10,6 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Component
 public class BotInitializer {
 
@@ -23,7 +22,7 @@ public class BotInitializer {
         try {
             telegramBotsApi.registerBot(bot);
         } catch (TelegramApiException ex) {
-            log.error("Error while init bot: ", ex.getMessage());
+//            log.error("Error while init bot: ", ex.getMessage());
         }
     }
 }
