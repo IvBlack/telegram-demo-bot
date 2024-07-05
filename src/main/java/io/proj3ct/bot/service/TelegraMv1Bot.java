@@ -16,6 +16,8 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.sql.Timestamp;
@@ -86,7 +88,6 @@ public class TelegraMv1Bot extends TelegramLongPollingBot {
     }
 
     private void registerUser(Message msg) {
-
         if(userRepository.findById(msg.getChatId()).isEmpty()){
 
             var chatId = msg.getChatId();
@@ -117,10 +118,44 @@ public class TelegraMv1Bot extends TelegramLongPollingBot {
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
 
+        //---------------работа с виртуальной клавиатурой---------------------
+
+        /*
+            Виртуальная клавиатура создается добавляется к объекту SendMessage.
+            Если необходимо инстанцировать на каждое сбщ свой тип клавиатуры: вынести создание в отдельный метод,
+            и подавать в sendMessageToUser в качестве одного из аргументов.
+        * */
+        ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboardRows = getKeyboardRows();
+
+        keyboard.setKeyboard(keyboardRows);
+        message.setReplyMarkup(keyboard);
+
+        //-------------------------------------------------------------------
         try {
             execute(message);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static List<KeyboardRow> getKeyboardRows() {
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+
+        //отправляет команду при нажатии кнопки
+        KeyboardRow row = new KeyboardRow();
+
+        //добавим ряд кнопок в список рядов, порядок имеет значение
+        row.add("weather");
+        row.add("create random joke");
+        keyboardRows.add(row);
+
+        //новый ряд кнопок
+        row = new KeyboardRow();
+        row.add("register");
+        row.add("check my data");
+        row.add("delete my data");
+        keyboardRows.add(row);
+        return keyboardRows;
     }
 }
