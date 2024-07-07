@@ -83,7 +83,9 @@ public class TelegraMv1Bot extends TelegramLongPollingBot {
                                 .getFirstName());
                 break;
                 case "/h": sendMessageToUser(chatId, HELP_TEXT);
-                    break;
+                break;
+                case "/register": register(chatId);
+                break;
                 default: sendMessageToUser(chatId, "Sorry, command is not recognized.");
             }
         }
@@ -110,8 +112,25 @@ public class TelegraMv1Bot extends TelegramLongPollingBot {
         //расположение кнопок
         rowInLine.add(yesButton);
         rowInLine.add(noButton);
+        rowsInLine.add(rowInLine);
+
+        //собрали клавиатуру из кнопок, прикрепили к объекту сообщения
+        markupInLine.setKeyboard(rowsInLine);
+        message.setReplyMarkup(markupInLine);
+
+        //отправка сообщения
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
     }
 
+    /*
+        Обработка пользователя на предмет наличия в БД при команде /start.
+        Если нет в БД юзера - создается новый,
+        на основе данных, что вытягиваются из объекта сообщения Message (текст, фото, стикер - что угодно)
+    */
     private void registerUser(Message msg) {
         if(userRepository.findById(msg.getChatId()).isEmpty()){
 
@@ -138,24 +157,22 @@ public class TelegraMv1Bot extends TelegramLongPollingBot {
         sendMessageToUser(chatId, answer);
     }
 
+    /*
+        Виртуальная клавиатура создается добавляется к объекту SendMessage.
+        Если необходимо инстанцировать на каждое сбщ свой тип клавиатуры: вынести создание в отдельный метод,
+        и подавать в sendMessageToUser в качестве одного из аргументов.
+    * */
     private void sendMessageToUser(long chatId, String textToSend) {
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
 
         //---------------работа с виртуальной клавиатурой---------------------
-
-        /*
-            Виртуальная клавиатура создается добавляется к объекту SendMessage.
-            Если необходимо инстанцировать на каждое сбщ свой тип клавиатуры: вынести создание в отдельный метод,
-            и подавать в sendMessageToUser в качестве одного из аргументов.
-        * */
         ReplyKeyboardMarkup keyboard = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboardRows = getKeyboardRows();
 
         keyboard.setKeyboard(keyboardRows);
         message.setReplyMarkup(keyboard);
-
         //-------------------------------------------------------------------
         try {
             execute(message);
